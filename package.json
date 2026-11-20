@@ -1,0 +1,21 @@
+{
+  "name": "duplicate-product-finder",
+  "version": "0.1.0",
+  "description": "Which duplicate products can a catalogue merge without a person? Four matching methods scored on public product matching benchmarks.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "download": "sh scripts/0-download.sh",
+    "parse": "cd work && python3 ../scripts/1-parse.py",
+    "embed": "cd work && node ../scripts/2-embed.mjs",
+    "match": "cd work && python3 ../scripts/3-match.py && python3 ../scripts/4-bands.py",
+    "export": "cd work && python3 ../scripts/5-export.py",
+    "serve": "python3 -m http.server 8000"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@energetic-ai/core": "^0.2.0",
+    "@energetic-ai/embeddings": "^0.2.0",
+    "@energetic-ai/model-embeddings-en": "^0.2.0"
+  }
+}
