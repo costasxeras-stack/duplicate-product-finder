@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Duplicate Product Finder</title>
+<meta name="description" content="Which duplicate products can a catalogue merge without a person checking? Four matching methods scored on public product matching benchmarks.">
+<meta name="theme-color" content="#f5f7f6">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23166534'/%3E%3Crect x='7' y='9' width='11' height='14' rx='2' fill='none' stroke='white' stroke-width='2.4'/%3E%3Crect x='14' y='9' width='11' height='14' rx='2' fill='none' stroke='white' stroke-width='2.4'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f5f7f6; --card:#fff; --ink:#141a17; --muted:#56605b; --faint:#88918c; --line:#e1e6e3;
+  --accent:#166534; --accent-soft:#e8f3ec; --merge:#15803d; --review:#b45309; --keep:#94a3b8; --bad:#b91c1c; --bad-soft:#fdecec;
+  --display:"Space Grotesk",Arial,sans-serif; --body:"Work Sans",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:clip}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--body);-webkit-font-smoothing:antialiased}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;margin:0;text-wrap:balance}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+header.top{border-bottom:1px solid var(--line);background:#fff}
+header.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;height:60px}
+.brand{white-space:nowrap;font-family:var(--display);font-weight:700;font-size:18px;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px}
+.brand i{width:22px;height:22px;border-radius:6px;background:var(--accent);display:inline-block}
+.top nav{display:flex;gap:18px;font-size:14.5px}
+.top nav a{color:var(--muted);text-decoration:none;white-space:nowrap}
+.intro{padding:40px 0 24px}
+.ver{font:600 12.5px var(--body);color:var(--accent);background:var(--accent-soft);padding:3px 9px;border-radius:999px}
+.intro h1{font-size:clamp(30px,4.6vw,48px);line-height:1.06;margin-top:14px;max-width:22ch}
+.intro p{color:var(--muted);font-size:18px;max-width:70ch;margin:14px 0 0}
+section.block{margin-top:22px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px}
+.card h2{font-size:24px}
+.sub{color:var(--muted);font-size:15px;margin:6px 0 0;max-width:74ch}
+.seg{display:flex;gap:6px;flex-wrap:wrap}
+.seg button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font:600 14px var(--body);color:var(--muted);cursor:pointer}
+.seg button[aria-pressed="true"]{border-color:var(--ink);color:var(--ink)}
+.ds-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.ds-row .note{margin:0}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:16px;background:#fff}
+.stat b{display:block;font:700 30px/1 var(--display)}
+.stat span{display:block;color:var(--muted);font-size:14px;margin-top:6px}
+.sliders{display:grid;grid-template-columns:1fr 1fr 200px;gap:18px;margin-top:18px;align-items:end}
+.field{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.field>span{font-weight:600;color:var(--muted);font-size:13.5px;display:flex;justify-content:space-between}
+.field output{font-variant-numeric:tabular-nums;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+input[type=number],select{padding:9px 11px;border:1px solid var(--line);border-radius:9px;font:15px var(--body);background:#fff;color:var(--ink);width:100%}
+.flow{display:flex;height:44px;border-radius:12px;overflow:hidden;margin-top:18px;border:1px solid var(--line)}
+.flow div{display:flex;align-items:center;justify-content:center;font:600 13.5px var(--body);color:#fff;white-space:nowrap;overflow:hidden;min-width:0;transition:flex-grow .25s}
+.f-merge{background:var(--merge)} .f-review{background:var(--review)} .f-keep{background:var(--keep)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13.5px;color:var(--muted);margin-top:10px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:middle}
+.reset{border:0;background:none;color:var(--accent);font:600 14px var(--body);cursor:pointer;padding:0;margin-top:10px}
+.note{font-size:13.5px;color:var(--faint);margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:14px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line)}
+th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint);font-weight:600}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+td small{display:block;color:var(--faint);font-size:12.5px}
+tr.best td{background:var(--accent-soft)}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.filters .field{min-width:200px}
+.pairs{display:grid;gap:10px;margin-top:12px}
+.pair{border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.pair .top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.pill{border-radius:999px;padding:3px 10px;font-weight:600;font-size:12.5px;white-space:nowrap}
+.p-merge{background:#e7f5ec;color:var(--merge)} .p-review{background:#fdf2e3;color:var(--review)} .p-keep{background:#eef1f5;color:#475569}
+.p-bad{background:var(--bad-soft);color:var(--bad)} .p-dup{background:var(--accent-soft);color:var(--accent)} .p-diff{background:#eef1f5;color:#475569}
+.sides{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.side{background:#f8faf9;border-radius:10px;padding:10px 12px;font-size:14px;min-width:0;overflow-wrap:anywhere}
+.side b{display:block;font-weight:600;margin-bottom:4px}
+.side small{color:var(--faint);font-size:12.5px}
+.sig{display:flex;gap:6px 14px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:10px}
+.more{margin-top:12px;border:1px solid var(--line);background:#fff;border-radius:10px;padding:10px 16px;font:600 14.5px var(--body);cursor:pointer}
+footer{margin:44px 0 0;border-top:1px solid var(--line);background:#fff}
+footer .wrap{padding:22px 20px 34px;font-size:13.5px;color:var(--muted);display:grid;gap:6px}
+@media (max-width:860px){.stats{grid-template-columns:1fr 1fr}.sliders{grid-template-columns:1fr}}
+@media (max-width:640px){.sides{grid-template-columns:1fr}.card{padding:18px}.intro p{font-size:16.5px}.top nav a.hide-sm{display:none}th,td{padding:9px 5px;font-size:13.5px}.filters .field{min-width:0;flex:1 1 140px}}
+@media (max-width:640px){.rk{display:none}#methods td:first-child{min-width:0}th.n{white-space:normal;max-width:90px}th{font-size:11px;letter-spacing:.02em}}
+@media (max-width:420px){.brand{font-size:16px}.top nav{gap:12px;font-size:13.5px}.stat b{font-size:26px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><i aria-hidden="true"></i>Duplicate Product Finder</a>
+    <nav>
+      <a href="https://github.com/costasxeras-stack/duplicate-product-finder/blob/main/docs/case-study.md">Case study</a>
+      <a class="hide-sm" href="https://github.com/costasxeras-stack/duplicate-product-finder">GitHub</a>
+      <a href="https://kostasxeras.com/">Portfolio</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="intro">
+    <span class="ver">v0.1.0</span>
+    <h1>Which duplicate products can be merged without a person?</h1>
+    <p>When two shops' catalogues are combined, the same product often appears twice under different titles. Merging two different products is worse than keeping a duplicate. This page scores four ways to find duplicates on public benchmark data, and lets you set the line between merging, a person checking, and keeping them apart.</p>
+  </section>
+
+  <section class="block card">
+    <div class="ds-row">
+      <div class="seg" role="group" aria-label="Dataset" id="ds"></div>
+      <p class="note" id="ds-note"></p>
+    </div>
+    <h2 style="margin-top:18px">Set the merge rule</h2>
+    <p class="sub">Each candidate pair gets a score from the combined model. Above the merge line it is merged automatically. Below the keep line it stays as two products. In between, a person checks.</p>
+    <div class="sliders">
+      <label class="field"><span>Merge automatically at or above <output id="o-hi"></output></span><input id="hi" type="range" min="0.3" max="0.99" step="0.01"></label>
+      <label class="field"><span>Keep apart below <output id="o-lo"></output></span><input id="lo" type="range" min="0.005" max="0.5" step="0.005"></label>
+      <label class="field"><span>Minutes per check (your assumption)</span><input id="mins" type="number" min="0.1" step="0.5" value="1"></label>
+    </div>
+    <button class="reset" id="reset">Back to the lines set on validation pairs</button>
+    <div class="flow" id="flow" aria-hidden="true"></div>
+    <div class="legend"><span><i class="dot" style="background:var(--merge)"></i>Merged automatically</span><span><i class="dot" style="background:var(--review)"></i>A person checks</span><span><i class="dot" style="background:var(--keep)"></i>Kept apart automatically</span></div>
+    <div class="stats" id="stats" aria-live="polite"></div>
+    <p class="note" id="lines-note"></p>
+  </section>
+
+  <section class="block card">
+    <h2>Four ways to find duplicates</h2>
+    <p class="sub">On the test pairs only. Thresholds were chosen on separate validation pairs. "Right when it says duplicate" is how many of its matches are real. "Duplicates found" is how many of the real ones it catches.</p>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Method</th><th class="n">Right when it says duplicate</th><th class="n">Duplicates found</th><th class="n rk">Ranking score</th></tr></thead>
+      <tbody id="methods"></tbody>
+    </table></div>
+    <p class="note">Ranking score: how well the method puts real duplicates above other pairs, from 0 to 1 (average precision). The model number rule gives a yes or no, so it has no ranking score.</p>
+  </section>
+
+  <section class="block card">
+    <h2>Look at the pairs</h2>
+    <p class="sub">Every test pair, with the signals the model used. The label comes from the benchmark and was made by people.</p>
+    <div class="filters">
+      <label class="field">Show<select id="f-show">
+        <option value="wrong">Wrong merges</option><option value="missed">Duplicates kept apart</option><option value="review">Sent to a person</option><option value="merge">Merged automatically</option><option value="all">All pairs</option>
+      </select></label>
+    </div>
+    <p class="note" id="count"></p>
+    <div class="pairs" id="pairs"></div>
+    <button class="more" id="more">Show more</button>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Built by <a href="https://kostasxeras.com/">Konstantinos Xeras</a> with Claude (Anthropic) as engineering partner. <a href="https://github.com/costasxeras-stack/duplicate-product-finder">Code and data on GitHub</a>.</span>
+    <span>Data: the Walmart-Amazon and Abt-Buy product matching benchmarks (Magellan data repository), in the train, validation and test split published with the Ditto research code. The candidate pairs were already filtered to similar looking products, so the share of duplicates is far higher than in a real catalogue.</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  var pct = function (x) { return (x * 100).toFixed(0) + '%'; };
+  var D, ds = 'Walmart-Amazon', shown = 0, list = [];
+  var NAMES = { rule: 'Same brand and model number (rule, no AI)', title: 'Title similarity (no AI)', ai: 'Local AI model, title meaning only', combined: 'Combined model (all signals)' };
+
+  fetch('data/app-data.json').then(function (r) { return r.json(); }).then(function (d) { D = d; init(); })
+    .catch(function () { $('stats').innerHTML = '<div class="stat">The data could not load. Refresh the page.</div>'; });
+
+  function init() {
+    $('ds').innerHTML = Object.keys(D).map(function (k) { return '<button data-k="' + k + '" aria-pressed="' + (k === ds) + '">' + k + '</button>'; }).join('');
+    $('ds').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; ds = b.dataset.k; $('ds').querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === b); }); load(); });
+    ['hi', 'lo', 'mins'].forEach(function (id) { $(id).addEventListener('input', update); });
+    $('reset').addEventListener('click', function () { $('hi').value = D[ds].hi; $('lo').value = D[ds].lo; update(); });
+    $('f-show').addEventListener('change', filter);
+    $('more').addEventListener('click', function () { render(20); });
+    load();
+  }
+  function load() {
+    var d = D[ds], c = d.counts;
+    $('ds-note').textContent = c.test.toLocaleString('en') + ' test pairs, ' + c.test_dups + ' of them real duplicates. Model trained on ' + c.train.toLocaleString('en') + ' other pairs.';
+    $('hi').value = d.hi; $('lo').value = d.lo;
+    var best = Object.keys(d.methods).reduce(function (a, k) { return d.methods[k][2] > d.methods[a][2] ? k : a; }, 'rule');
+    $('methods').innerHTML = ['rule', 'title', 'ai', 'combined'].map(function (k) {
+      var m = d.methods[k];
+      return '<tr' + (k === best ? ' class="best"' : '') + '><td>' + NAMES[k] + '</td><td class="n">' + pct(m[0]) + '</td><td class="n">' + pct(m[1]) + '</td><td class="n rk">' + (m[3] == null ? '–' : m[3].toFixed(2)) + '</td></tr>';
+    }).join('');
+    update();
+  }
+  function band(p, hi, lo) { return p.s >= hi ? 'merge' : (p.s < lo ? 'keep' : 'review'); }
+  function update() {
+    var d = D[ds], hi = +$('hi').value, lo = Math.min(+$('lo').value, hi), mins = Math.max(0, +$('mins').value || 0);
+    $('o-hi').textContent = hi.toFixed(2); $('o-lo').textContent = lo.toFixed(3);
+    var n = { merge: 0, review: 0, keep: 0 }, wrong = 0, missed = 0, dups = 0, revDups = 0;
+    d.pairs.forEach(function (p) { var b = band(p, hi, lo); n[b]++; if (p.y) dups++; if (b === 'merge' && !p.y) wrong++; if (b === 'keep' && p.y) missed++; if (b === 'review' && p.y) revDups++; });
+    var N = d.pairs.length;
+    $('flow').innerHTML = ['merge', 'review', 'keep'].map(function (k) { return '<div class="f-' + k + '" style="flex-grow:' + n[k] + '">' + (n[k] / N > 0.07 ? n[k].toLocaleString('en') : '') + '</div>'; }).join('');
+    var hours = n.review * mins / 60 * 1000 / N;
+    $('stats').innerHTML =
+      stat(pct((n.merge + n.keep) / N), 'of pairs closed without a person') +
+      stat(wrong, 'wrong merges (two different products joined)') +
+      stat(missed + ' of ' + dups, 'real duplicates kept apart') +
+      stat(hours.toFixed(1) + ' h', 'of checking per 1,000 pairs, at ' + mins + ' min each');
+    $('lines-note').textContent = 'Lines set on validation pairs: merge at ' + d.hi + ' or above (95% right there), keep apart below ' + d.lo + ' (keeps 95% of duplicates above it). ' + revDups + ' of the ' + n.review + ' pairs sent to a person are real duplicates.';
+    filter();
+  }
+  function stat(b, t) { return '<div class="stat"><b>' + b + '</b><span>' + t + '</span></div>'; }
+
+  function filter() {
+    var d = D[ds], hi = +$('hi').value, lo = Math.min(+$('lo').value, hi), f = $('f-show').value;
+    list = d.pairs.filter(function (p) {
+      var b = band(p, hi, lo);
+      if (f === 'wrong') return b === 'merge' && !p.y;
+      if (f === 'missed') return b === 'keep' && p.y;
+      if (f === 'all') return true;
+      return b === f;
+    }).sort(function (a, b) { return b.s - a.s; });
+    shown = 0; $('pairs').innerHTML = ''; render(20);
+  }
+  function side(t, brand, model, price) {
+    var bits = [brand ? 'Brand: ' + esc(brand) : '', model ? 'Model: ' + esc(model) : '', price && +price > 0 ? 'Price: ' + esc(price) : ''].filter(Boolean).join(' · ');
+    return '<div class="side"><b>' + esc(t || '(no title)') + '</b><small>' + bits + '</small></div>';
+  }
+  function render(k) {
+    var hi = +$('hi').value, lo = Math.min(+$('lo').value, hi);
+    var BL = { merge: ['p-merge', 'Merged'], review: ['p-review', 'A person checks'], keep: ['p-keep', 'Kept apart'] };
+    $('pairs').insertAdjacentHTML('beforeend', list.slice(shown, shown + k).map(function (p) {
+      var b = band(p, hi, lo), bad = (b === 'merge' && !p.y) || (b === 'keep' && p.y);
+      var g = p.sig;
+      return '<div class="pair"><div class="top"><span><span class="pill ' + BL[b][0] + '">' + BL[b][1] + ', score ' + p.s.toFixed(2) + '</span> ' +
+        (bad ? '<span class="pill p-bad">' + (p.y ? 'Missed duplicate' : 'Wrong merge') + '</span>' : '') + '</span><span class="pill ' + (p.y ? 'p-dup' : 'p-diff') + '">' + (p.y ? 'Same product' : 'Different products') + '</span></div>' +
+        '<div class="sides">' + side(p.a, p.ab, p.am, p.ap) + side(p.b, p.bb, p.bm, p.bp) + '</div>' +
+        '<div class="sig"><span>Title similarity ' + g.title.toFixed(2) + '</span><span>AI similarity ' + g.ai.toFixed(2) + '</span><span>Model number: ' + g.model + '</span>' + (g.price != null ? '<span>Price ratio ' + g.price.toFixed(2) + '</span>' : '') + '<span>Rule says: ' + (p.rule ? 'duplicate' : 'not a duplicate') + '</span></div></div>';
+    }).join(''));
+    shown = Math.min(list.length, shown + k);
+    $('count').textContent = list.length.toLocaleString('en') + ' pairs' + (list.length ? ', showing ' + shown : '');
+    $('more').style.display = shown < list.length ? '' : 'none';
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+Walmart-Amazon all AP 0.747
+Walmart-Amazon no embedding AP 0.736
+Walmart-Amazon only title+model AP 0.710
+  bands hi=0.90 lo=0.06 | auto-merge 30 (96.7% right, 1 wrong) | review 466 (23% of pairs, 149 dups) | keep separate 1553 (missed dups 15 of 193)
+   review band: share with a missing model number 27%, all pairs 24%  precision of auto-merge on pairs with both model numbers 0.967 30 with missing 0
+Abt-Buy all AP 0.907
+Abt-Buy no embedding AP 0.905
+Abt-Buy only title+model AP 0.903
+  bands hi=0.91 lo=0.03 | auto-merge 83 (96.4% right, 3 wrong) | review 381 (20% of pairs, 118 dups) | keep separate 1452 (missed dups 8 of 206)
+   review band: share with a missing model number 61%, all pairs 12%  precision of auto-merge on pairs with both model numbers 0.963 82 with missing 1
