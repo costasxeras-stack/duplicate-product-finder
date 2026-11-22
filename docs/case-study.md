@@ -82,4 +82,4 @@ The "one model number contains the other" signal caught duplicates such as "p-fd
 
 ## My role
 
-I framed the problem, chose the methods, the three bands and how to set their lines, and wrote the findings. Claude (Anthropic) wrote the code with me and ran the checks.
+I framed the problem, chose the methods, the three bands and how to set their lines, and wrote the findings.

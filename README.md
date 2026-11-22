@@ -41,9 +41,9 @@ Full detail in the [case study](docs/case-study.md). Test pairs only.
 
 The [Walmart-Amazon and Abt-Buy benchmarks](https://github.com/anhaidgroup/deepmatcher/blob/master/Datasets.md) from the Magellan data repository, in the train, validation and test split published with the [Ditto](https://github.com/megagonlabs/ditto) research code (Apache 2.0). The labels were made by people. The candidate pairs were already filtered to similar looking products, so duplicates are about 10% of pairs here and far rarer in a real catalogue. The licence of the underlying product data is not stated.
 
-## How it was built
+## My role
 
-I framed the problem, chose the methods, the three-band rule and how to set its lines, and wrote the findings. Claude (Anthropic) was my engineering partner for the code. Decisions are recorded in [docs/decisions](docs/decisions).
+I framed the problem, chose the methods, the three-band rule and how to set its lines, and wrote the findings. Decisions are recorded in [docs/decisions](docs/decisions).
 
 ## Run it yourself
 
