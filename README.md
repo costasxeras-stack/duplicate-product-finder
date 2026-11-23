@@ -2,7 +2,7 @@
 
 **Which duplicate products can a catalogue merge without a person checking? Four matching methods, from a simple model number rule to a local AI model, scored on two public product matching benchmarks, with a merge, check or keep-apart rule you can set yourself.**
 
-**Current version:** 0.1.0
+**Current version:** 0.2.0
 
 Live results: https://kostasxeras.com/duplicate-product-finder/
 

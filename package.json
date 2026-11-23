@@ -1,6 +1,6 @@
 {
   "name": "duplicate-product-finder",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Which duplicate products can a catalogue merge without a person? Four matching methods scored on public product matching benchmarks.",
   "private": true,
   "type": "module",
